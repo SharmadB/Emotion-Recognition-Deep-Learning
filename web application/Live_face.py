@@ -4,14 +4,36 @@ from tensorflow.keras.preprocessing.image import img_to_array
 import numpy as np
 import cv2
 import os
+from pathlib import Path
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+
+# Base directory (directory where Live_face.py is located)
+BASE_DIR = Path(__file__).resolve().parent
+
+# Upload folder
+UPLOAD_FOLDER = BASE_DIR / "uploads"
+app.config['UPLOAD_FOLDER'] = str(UPLOAD_FOLDER)
 
 # Load the emotion detection model
-emotion_model = load_model("C:/Users/Sharmad/Desktop/BE/web application Final/web application/model/Final_model.h5")
-class_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Neutral', 'Sad', 'Surprise']
-face_classifier = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+MODEL_PATH = BASE_DIR / "model" / "Final_model.h5"
+emotion_model = load_model(str(MODEL_PATH))
+
+# Emotion labels
+class_labels = [
+    'Angry',
+    'Disgust',
+    'Fear',
+    'Happy',
+    'Neutral',
+    'Sad',
+    'Surprise'
+]
+
+# Face detector
+face_classifier = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml" )
+
 
 # Global variable to store the latest detected emotion (optional for UI update)
 current_emotion = "None"
