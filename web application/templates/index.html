@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+            transition: all 0.3s ease-in-out;
+        }
+
+        body {
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: white;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 18px;
+            color: white;
+            background: linear-gradient(45deg, #007BFF, #0056b3);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #222;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .dark-mode-toggle:hover {
+            background: #444;
+        }
+
+        #video-container {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        img {
+            width: 640px;
+            height: 480px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .show {
+            display: block !important;
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: red;
+        }
+
+        .status.active {
+            color: green;
+        }
+
+        .emotion-display {
+            margin-top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 15px;
+            font-size: 18px;
+            color: #007BFF;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        form {
+            margin: 20px 0;
+        }
+
+        input[type="file"] {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        #upload-results {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle">🌙 Dark Mode</button>
+
+    <h1>Live Emotion Detection</h1>
+    <div class="container">
+        <button id="start-btn">▶ Start Camera</button>
+        <button id="stop-btn" class="hidden">⏹ Stop Camera</button>
+
+        <div class="status">📷 Camera Off</div>
+        <div class="loading">⏳ Loading camera...</div>
+
+        <div id="video-container">
+            <img id="video-feed" src="" alt="Live Feed">
+        </div>
+
+        <div class="emotion-display">😊 Emotion Detected</div>
+
+        <hr style="margin: 40px 0; width: 80%;">
+
+        <h2>Upload Image for Emotion Detection</h2>
+        <form id="image-form" method="POST" action="/upload_image" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">📷 Upload Image</button>
+        </form>
+
+        <h2>Upload Video for Emotion Detection</h2>
+        <form id="video-form" method="POST" action="/upload_video" enctype="multipart/form-data">
+            <input type="file" name="video" accept="video/*" required>
+            <button type="submit">🎥 Upload Video</button>
+        </form>
+
+        <div id="upload-results"></div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById("start-btn");
+        const stopBtn = document.getElementById("stop-btn");
+        const videoContainer = document.getElementById("video-container");
+        const videoFeed = document.getElementById("video-feed");
+        const darkModeBtn = document.querySelector(".dark-mode-toggle");
+        const statusIndicator = document.querySelector(".status");
+        const loadingText = document.querySelector(".loading");
+        const emotionDisplay = document.querySelector(".emotion-display");
+        const uploadResults = document.getElementById("upload-results");
+
+        // Start Camera
+        startBtn.addEventListener("click", () => {
+            loadingText.style.display = "block";
+            setTimeout(() => {
+                videoFeed.src = "{{ url_for('video_feed') }}";
+                videoContainer.classList.add("show");
+                videoFeed.classList.add("show");
+                startBtn.classList.add("hidden");
+                stopBtn.classList.remove("hidden");
+                statusIndicator.textContent = "✅ Camera On";
+                statusIndicator.classList.add("active");
+                loadingText.style.display = "none";
+                emotionDisplay.style.display = "block";
+            }, 1500);
+        });
+
+        // Stop Camera
+        stopBtn.addEventListener("click", () => {
+            videoFeed.src = "";
+            videoContainer.classList.remove("show");
+            videoFeed.classList.remove("show");
+            startBtn.classList.remove("hidden");
+            stopBtn.classList.add("hidden");
+            statusIndicator.textContent = "📷 Camera Off";
+            statusIndicator.classList.remove("active");
+            emotionDisplay.style.display = "none";
+        });
+
+        // Dark Mode Toggle
+        darkModeBtn.addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+            darkModeBtn.textContent = document.body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
+        });
+
+        // Optional: Show upload results without reloading
+        const imageForm = document.getElementById('image-form');
+        const videoForm = document.getElementById('video-form');
+
+        imageForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(imageForm);
+            fetch('/upload_image', { method: 'POST', body: formData })
+                .then(res => res.text())
+                .then(data => uploadResults.innerText = data)
+                .catch(err => uploadResults.innerText = "Error uploading image.");
+        });
+
+        videoForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(videoForm);
+            fetch('/upload_video', { method: 'POST', body: formData })
+                .then(res => res.text())
+                .then(data => uploadResults.innerText = data)
+                .catch(err => uploadResults.innerText = "Error uploading video.");
+        });
+    </script>
+</body>
+</html>
