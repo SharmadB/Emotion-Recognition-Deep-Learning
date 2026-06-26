@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+emotion_log.csv
+
+# Uploads
+web application/uploads/annotated/*
+web application/static/uploads/*
+
+# Generated Results
+web application/static/results/*
+
+# Keep folders
+!web application/static/results/.gitkeep
+!web application/uploads/annotated/.gitkeep
+
+# Jupyter
+.ipynb_checkpoints/
