@@ -56,13 +56,13 @@ Emotion-Recognition-Deep-Learning
 git clone https://github.com/SharmadB/Emotion-Recognition-Deep-Learning.git
 ```
 
-Install dependencies ( Go inside the proj folder )
+Install dependencies ( Go inside the Emotion-Recog folder )
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run
+Run (Go inside the wen application folder)
 
 ```bash
 python Live_face.py
