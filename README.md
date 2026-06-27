@@ -56,7 +56,7 @@ Emotion-Recognition-Deep-Learning
 git clone https://github.com/SharmadB/Emotion-Recognition-Deep-Learning.git
 ```
 
-Install dependencies
+Install dependencies ( Go inside the proj folder )
 
 ```bash
 pip install -r requirements.txt
